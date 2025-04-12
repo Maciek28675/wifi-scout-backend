@@ -28,12 +28,3 @@ class Post(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'))
     content = Column(String)
     location = Column(String)
-
-engine = create_engine('sqlite:///database.db', echo=True)
-
-Base.metadata.create_all(engine)
-
-with Session(engine) as session:
-    new_user = User(email="272488@student.pwr.edu.pl", password="password")
-    session.add(new_user)
-    session.commit()

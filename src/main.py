@@ -1,8 +1,13 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from init_db import Base, User, Measurement, Post
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
+from auth.auth_handler import sign_jwt
+from model import UserRegisterSchema, UserLoginSchema
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
@@ -22,7 +27,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 async def root():
-    return {"message": "Hello from FastAPI!"}
+    return {"message": "Hello from FastAPI OK!"}
 
 @app.get("/users")
 async def get_users():
@@ -30,19 +35,20 @@ async def get_users():
         users = session.query(User).all()
         return users
 
-@app.post("/register")
-async def create_user(email: str, password: str):
+@app.post("/user/register", tags=["user"])
+async def create_user(req: UserRegisterSchema):
     with Session(engine) as session:
-        new_user = User(email=email, password=password)
+        hashed_password = pwd_context.hash(req.password)
+        new_user = User(email=req.email, password=hashed_password)
         session.add(new_user)
         session.commit()
         return new_user
-
-@app.get("/login")
-async def login(email: str, password: str):
+    
+@app.post("/user/login", tags=["user"])
+async def login_user(user: UserLoginSchema = Body(...)):
     with Session(engine) as session:
-        user = session.query(User).filter_by(email=email, password=password).first()
-        if user:
-            return {"message": "Login successful", "user_id": user.user_id}
+        db_user = session.query(User).filter_by(email=user.email).first()
+        if db_user and pwd_context.verify(user.password, db_user.password):
+            return sign_jwt(db_user.email)
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
