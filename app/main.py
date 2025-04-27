@@ -1,10 +1,10 @@
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from init_db import Base, User, Measurement, Post
+from models import Base, User, Measurement, Post
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from auth.auth_handler import sign_jwt
-from model import UserRegisterSchema, UserLoginSchema
+from schemas import UserRegisterSchema, UserLoginSchema
 import bcrypt
 import logging
 
@@ -31,6 +31,7 @@ Base.metadata.create_all(bind=engine)
 async def root():
     return {"message": "Hello from FastAPI OK!"}
 
+# TODO: Usunac te endpointy i zarejestrować te zrobione w folderze routers
 @app.get("/users")
 async def get_users():
     with Session(engine) as session:
@@ -69,14 +70,14 @@ async def login_user(user: UserLoginSchema = Body(...)):
             db_user = session.query(User).filter_by(email=user.email).first()
 
             if not db_user:
-                logging.warning(f"Login failed – user not found: {user.email}")
+                logging.warning(f"Login failed user not found: {user.email}")
                 raise HTTPException(status_code=404, detail="User not found")
             
             if bcrypt.checkpw(user.password.encode('utf-8'), db_user.password.encode('utf-8')):
                 logging.info(f"User logged in: {user.email}")
                 return sign_jwt(db_user.email)
             else:
-                logging.warning(f"Login failed – incorrect password: {user.email}")
+                logging.warning(f"Login failed incorrect password: {user.email}")
                 raise HTTPException(status_code=401, detail="Invalid credentials")
         except Exception as e:
             logging.error(f"Error during login for user {user.email}: {e}")
