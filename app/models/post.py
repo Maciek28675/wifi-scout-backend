@@ -1,4 +1,4 @@
-from imports import *
+from .imports import *
 
 class Post(Base):
     __tablename__ = 'posts'

@@ -3,6 +3,7 @@ from sqlalchemy import Engine, create_engine
 from schemas import UserRegisterSchema
 from crud import get_users, create_user
 from models import Base
+from app.main import engine
 
 router = APIRouter(
     prefix="/user",
@@ -10,7 +11,6 @@ router = APIRouter(
 )
 
 DATABASE_URL = "sqlite:///./database.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 Base.metadata.create_all(bind=engine)
 
 @router.get("/users")

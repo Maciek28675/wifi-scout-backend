@@ -1,10 +1,11 @@
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from models import Base, User, Measurement, Post
+from .models.imports import Base
+from .models.user import User
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
-from auth.auth_handler import sign_jwt
-from schemas import UserRegisterSchema, UserLoginSchema
+from .auth.auth_handler import sign_jwt
+from .schemas import UserRegisterSchema, UserLoginSchema
 import bcrypt
 import logging
 
