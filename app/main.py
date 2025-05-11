@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.imports import Base
-from app.routers import users
+from app.routers import forum, users
 from app.db import engine
 import logging
 
@@ -21,6 +21,7 @@ app.add_middleware(
 )
 
 Base.metadata.create_all(bind=engine)
+app.include_router(forum.router)
 app.include_router(users.router)
 
 @app.get("/")

@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Date, Float, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Date, Float, ForeignKey, UniqueConstraint, DateTime
 from sqlalchemy.orm import declarative_base, Session
 from datetime import datetime
 
@@ -12,6 +12,8 @@ __all__ = [
     "Date",
     "Float",
     "ForeignKey",
+    "UniqueConstraint",
+    "DateTime",
     
     "declarative_base",
     "Session",
