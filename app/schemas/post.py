@@ -22,7 +22,6 @@ class PostOut(BaseModel):
     location: str
     created_at: datetime
     upvotes: int
-    downvotes: int
     user_initials: str
 
     class Config:
@@ -30,4 +29,3 @@ class PostOut(BaseModel):
 
 class VoteSchema(BaseModel):
     post_id: int
-    value: Literal[1, -1]
