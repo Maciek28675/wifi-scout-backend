@@ -23,3 +23,7 @@ class UserLoginSchema(BaseModel):
                 "password": "weakpassword"
             }
         }
+
+class UserUpdateSchema(BaseModel):
+    email: EmailStr = Field(...)
+    password: str = Field(...)

@@ -1,22 +1,27 @@
 from fastapi import APIRouter
-from sqlalchemy import Engine, create_engine
-from schemas import UserRegisterSchema
-from crud import get_users, create_user
-from models import Base
+from app.schemas import UserRegisterSchema, UserLoginSchema
+from app.crud.user import UserService
+from fastapi import Depends, Body
+from sqlalchemy.orm import Session
+from app.db.database import get_db
 
 router = APIRouter(
     prefix="/user",
     tags=["User"],
+    responses={404: {"description": "Not found"}},
 )
 
-DATABASE_URL = "sqlite:///./database.db"
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-Base.metadata.create_all(bind=engine)
-
-@router.get("/users")
-async def users():
-    return get_users(engine)
+@router.get("/")
+async def users(db: Session = Depends(get_db)):
+    service = UserService(db)
+    return service.get_users(db)
 
 @router.post("/register")
-async def register(req: UserRegisterSchema):
-    return create_user(engine, req)
+async def register(req: UserRegisterSchema, db: Session = Depends(get_db)):
+    service = UserService(db)
+    return service.create_user(req)
+
+@router.post("/login")
+async def login(user: UserLoginSchema = Body(...), db: Session = Depends(get_db)):
+    service = UserService(db)
+    return service.login_user(user)

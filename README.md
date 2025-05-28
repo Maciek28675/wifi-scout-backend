@@ -13,6 +13,5 @@ pip install -r requirements.txt
 
 ## Run local server
 ```Powershell
-cd src/
-uvicorn main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```

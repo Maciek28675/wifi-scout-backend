@@ -1,8 +1,14 @@
-from imports import *
+from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
+from app.db.database import Base
 
 class User(Base):
-    __tablename__ = 'users'
-    user_id = Column(Integer, primary_key=True)
-    email = Column(String(50), unique=True, nullable=False)
-    password = Column(String(50), nullable=False)
-    signUpDate = Column(Date, default=datetime.now().date())
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    password = Column(String)
+    is_active = Column(Boolean, default=True)
+
+    posts = relationship("Post", back_populates="user")
+    measurements = relationship("Measurement", back_populates="user", cascade="all, delete-orphan")
