@@ -19,7 +19,6 @@ __all__ = [
     "Session",
     "relationship",
     "datetime",
-    "Base",
     "User",
     "Measurement",
     "Post"

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -102,3 +102,22 @@ def delete_measurement(measurement_id: int, db: Session = Depends(get_db)):
             detail="Measurement not found"
         )
     return {"message": "Pomiar usunięty"}
+
+@router.get(
+        "/measurements/nearby",
+        responses={
+            200: {"description": "Measurements found"},
+            400: {"description": "Invalid parameters"},
+            500: {"description": "Internal server error"}
+        }
+)
+def read_measurements_nearby(
+    latitude: float = Query(..., description="Szerokość geograficzna"),
+    longitude: float = Query(..., description="Długość geograficzna"),
+    radius_km: float = Query(1.0, description="Promień w km"),
+    skip: int = 0,
+    limit: int = 50,
+    db: Session = Depends(get_db)
+):
+    service = MeasurementService(db)
+    return service.get_measurements_nearby(latitude, longitude, radius_km, skip, limit)
