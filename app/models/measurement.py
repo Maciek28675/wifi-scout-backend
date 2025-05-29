@@ -24,6 +24,12 @@ class Measurement(Base):
         nullable=False,
         comment="Geographic longitude (-180 to 180)"
     )
+    height = Column(
+        Float,
+        CheckConstraint("height >= 0"),
+        nullable=True,
+        comment="Height above sea level in meters"
+    )
     download_speed = Column(
         Float,
         CheckConstraint("download_speed >= 0"),

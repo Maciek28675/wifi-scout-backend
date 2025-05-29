@@ -17,6 +17,12 @@ class MeasurementBase(BaseModel):
         examples=[21.0122],
         description="Geographic longitude between -180 and 180 degrees"
     )
+    height: Optional[float] = Field(
+        None,
+        ge=0,
+        examples=[100.0],
+        description="Height above sea level in meters"
+    )
     download_speed: Optional[float] = Field(
         None,
         ge=0,
