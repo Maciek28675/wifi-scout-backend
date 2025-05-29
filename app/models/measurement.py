@@ -24,12 +24,6 @@ class Measurement(Base):
         nullable=False,
         comment="Geographic longitude (-180 to 180)"
     )
-    signal_strength = Column(
-        Integer,
-        CheckConstraint("signal_strength BETWEEN -120 AND 0"),
-        nullable=True,
-        comment="Signal strength in dBm (-120 to 0)"
-    )
     download_speed = Column(
         Float,
         CheckConstraint("download_speed >= 0"),

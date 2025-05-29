@@ -17,13 +17,6 @@ class MeasurementBase(BaseModel):
         examples=[21.0122],
         description="Geographic longitude between -180 and 180 degrees"
     )
-    signal_strength: Optional[int] = Field(
-        None,
-        ge=-120,
-        le=0,
-        examples=[-80],
-        description="Signal strength in dBm (typically -120 to 0)"
-    )
     download_speed: Optional[float] = Field(
         None,
         ge=0,
