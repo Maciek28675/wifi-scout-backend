@@ -24,7 +24,7 @@ class MeasurementService:
             new_measurement = Measurement(
                 latitude=measurement_data.latitude,
                 longitude=measurement_data.longitude,
-                signal_strength=measurement_data.signal_strength,
+                height=measurement_data.height,
                 download_speed=measurement_data.download_speed,
                 upload_speed=measurement_data.upload_speed,
                 ping=measurement_data.ping,
