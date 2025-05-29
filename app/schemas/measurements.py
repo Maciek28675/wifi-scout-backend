@@ -53,7 +53,7 @@ class MeasurementBase(BaseModel):
             "example": {
                 "latitude": 52.2297,
                 "longitude": 21.0122,
-                "signal_strength": -80,
+                "height": 100.0,
                 "download_speed": 8.5,
                 "upload_speed": 3.2,
                 "ping": 42,
@@ -68,7 +68,7 @@ class MeasurementCreate(MeasurementBase):
 class MeasurementUpdate(BaseModel):
     latitude: Optional[float] = Field(None, ge=-90, le=90)
     longitude: Optional[float] = Field(None, ge=-180, le=180)
-    signal_strength: Optional[int] = Field(None, ge=-120, le=0)
+    height: Optional[float] = Field(None, ge=0)
     download_speed: Optional[float] = Field(None, ge=0)
     upload_speed: Optional[float] = Field(None, ge=0)
     ping: Optional[int] = Field(None, gt=0)
@@ -99,7 +99,7 @@ class MeasurementResponse(MeasurementBase):
                 "id": 1,
                 "latitude": 52.2297,
                 "longitude": 21.0122,
-                "signal_strength": -80,
+                "height": 100.0,
                 "download_speed": 8.5,
                 "upload_speed": 3.2,
                 "ping": 42,
