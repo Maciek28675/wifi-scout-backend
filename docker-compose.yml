@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    container_name: wifi_scout_backend
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/code                 # Mount project root to /code
+    env_file:
+      - .env
+    restart: unless-stopped
