@@ -5,9 +5,8 @@ from app.routers.user import router as user_router
 from app.db.database import engine
 from app.routers.measurements import router as measurements_router
 import logging
-from app.models.user import User
-from app.models.measurement import Measurement
-
+from app.models import User
+from app.models import Measurement
 
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas import UserRegisterSchema, UserLoginSchema
-from app.crud.user import UserService
+from app.crud import UserService
 from fastapi import Depends, Body
 from sqlalchemy.orm import Session
 from app.db.database import get_db
