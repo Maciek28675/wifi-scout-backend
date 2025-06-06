@@ -5,6 +5,9 @@ from .measurements import (
     MeasurementAggregateResponse, MeasurementCreate, MeasurementResponse, 
     MeasurementUpdate, MeasurementBase, CoordinateResponse, DistanceResponse,
 )
+from .post import (
+    PostCreate, PostOut, VoteSchema,
+)
 
 __all__ = [
     "UserLoginSchema",
@@ -17,4 +20,7 @@ __all__ = [
     "MeasurementBase",
     "CoordinateResponse",
     "DistanceResponse",
+    "PostCreate",
+    "PostOut",
+    "VoteSchema",
 ]

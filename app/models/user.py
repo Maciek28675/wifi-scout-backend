@@ -12,3 +12,5 @@ class User(Base):
 
     posts = relationship("Post", back_populates="user")
     measurements = relationship("Measurement", back_populates="user", cascade="all, delete-orphan")
+    votes = relationship("Vote", backref="user", cascade="all, delete-orphan")
+    
