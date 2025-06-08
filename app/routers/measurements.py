@@ -20,6 +20,7 @@ from app.schemas import (
     MeasurementUpdate,
 )
 from app.utils.distance_utils import haversine_distance
+from app.utils.buildings import find_building
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,18 @@ async def create_measurement(
     except Exception as e:
         logger.error(f"[create_measurement] {e}")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, "Błąd serwera")
+
+
+@router.get("/building")
+async def get_building_name(
+    latitude: float,
+    longitude: float,
+):
+    """
+    Zwraca nazwę budynku, jeśli podany punkt geograficzny znajduje się wewnątrz któregoś z budynków.
+    """
+    building = find_building(latitude, longitude)
+    return {"building": building}
 
 
 @router.get("/{measurement_id}", response_model=MeasurementResponse)
