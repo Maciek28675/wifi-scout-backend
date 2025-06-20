@@ -212,13 +212,35 @@ class MeasurementService:
                 detail=f"Error podczas usuwania pomiaru: {str(e)}",
             )
 
-    def calculate_color(self, download_speed: float) -> str:
+    def calculate_color(self, download_speed: float, upload_speed: float, ping: float) -> str:
         """
-        Wyznacz kolor na podstawie prędkości pobierania:
-        - Red: < 10 Mbps
-        - Green: >= 10 Mbps
-        - Gray: No speed data
+        Wyznacz kolor na podstawie znormalizowanych i uśrednionych prędkości wyników testu
         """
-        if download_speed is None:
-            return "gray"
-        return "red" if download_speed < 10 else "green"
+        
+        min_download = 1
+        max_download = 200
+        min_upload = 1
+        max_upload = 100
+        min_ping = 8
+        max_ping = 600
+
+        normalized_download = ((download_speed - min_download) / (max_download - min_download)) * 100
+        normalized_upload = ((upload_speed - min_upload) / (max_upload - min_upload)) * 100
+        normalized_ping = (1 - ((ping - min_ping) / (max_ping - min_ping))) * 100
+
+        download_w = 5
+        upload_w = 3
+        ping_w = 2
+
+        score = (
+            (download_w * normalized_download) + 
+            (upload_w * normalized_upload) +
+            (ping_w * normalized_ping)) / (download_w + upload_w + ping_w)
+        
+        if score <= 30:
+            return '#B22D2D'
+        elif score > 30 and score <= 70:
+            return '#E4A316'
+        elif score > 70:
+            return '#67B22D'
+        
