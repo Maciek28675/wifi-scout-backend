@@ -26,7 +26,7 @@ class MeasurementService:
                     detail="Brak wymaganych współrzędnych",
                 )
 
-            timestamp = measurement_data.timestamp or datetime.now(timezone.utc)
+            timestamp = datetime.now(timezone.utc + 2)
 
             new_measurement = Measurement(
                 latitude=measurement_data.latitude,
@@ -76,7 +76,7 @@ class MeasurementService:
                         download_speed=new_measurement.download_speed,
                         upload_speed=new_measurement.upload_speed,
                         ping=new_measurement.ping,
-                        timestamp=new_measurement.timestamp,
+                        timestamp=timestamp,
                         building_name=new_measurement.building_name 
                     )
                     updated_or_created_measurement = self.update_measurement(measurement.id, update_measurement_data)
