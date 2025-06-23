@@ -79,9 +79,6 @@ class MeasurementService:
                         timestamp=new_measurement.timestamp,
                         building_name=new_measurement.building_name 
                     )
-                    self.update_measurement(measurement.id, update_measurement_data)
-
-                    measurement_found = True
                     updated_or_created_measurement = self.update_measurement(measurement.id, update_measurement_data)
                     print(f'Measurement ID: {measurement.id} updated.')
                     break
