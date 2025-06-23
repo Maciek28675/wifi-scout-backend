@@ -182,6 +182,9 @@ class MeasurementService:
         db_measurement = self.get_measurement(measurement_id)
         update_data = new_data.model_dump(exclude_unset=True)
 
+        if "timestamp" in update_data:
+            db_measurement.timestamp = update_data["timestamp"]
+
         # 1. Update the sum fields and count
         new_dl = update_data.get("download_speed", 0.0) or 0.0
         new_ul = update_data.get("upload_speed", 0.0) or 0.0
