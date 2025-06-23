@@ -105,8 +105,8 @@ class MeasurementResponse(MeasurementBase):
 
     color: str = Field(
         ...,
-        examples=["red"],
-        description="Color indicator based on download speed (red/green/gray)",
+        examples=["#B22D2D"],
+        description="Color indicator based on download speed (red/green/yellow)",
     )
     timestamp: datetime = Field(..., description="Last update timestamp")
     model_config = ConfigDict(from_attributes=True)

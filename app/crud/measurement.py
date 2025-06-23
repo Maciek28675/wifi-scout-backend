@@ -54,6 +54,8 @@ class MeasurementService:
                 .all() 
             )
 
+            measurement_found = False
+
             for measurement in measurements_in_bulidng:
                 d = haversine_distance( 
                     new_measurement.latitude,
@@ -77,12 +79,14 @@ class MeasurementService:
                     self.update_measurement(measurement.id, update_measurement_data)
 
                     print(f'Measurement ID: {measurement.id} updated.')
-
+                    measurement_found = True
                     break
-                
-            self.db.add(new_measurement)
-            self.db.commit()
-            self.db.refresh(new_measurement)
+            
+            if (not measurement_found):
+                self.db.add(new_measurement)
+                self.db.commit()
+                self.db.refresh(new_measurement)
+                print(f'Nearby measurement not found. New measurement added.')
             return new_measurement
 
         except SQLAlchemyError as e:
