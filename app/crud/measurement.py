@@ -44,6 +44,9 @@ class MeasurementService:
                     measurement_data.upload_speed,
                     measurement_data.ping ),
                 measurement_count=1,
+                download_speed_sum=measurement_data.download_speed,
+                upload_speed_sum=measurement_data.upload_speed,
+                ping_sum=measurement_data.ping
             )
 
             # Get measurements in the same building
@@ -173,43 +176,36 @@ class MeasurementService:
             detail="Podaj albo building_name, albo latitude i longitude"
         )
 
-    def update_measurement(
-        self, measurement_id: int, measurement_data: MeasurementUpdate
-    ):
-        """Aktualizuj istniejący pomiar"""
+    def update_measurement(self, measurement_id: int, new_data: MeasurementUpdate):
+        """Add a new measurement to an existing geographic point"""
         db_measurement = self.get_measurement(measurement_id)
-        update_data = measurement_data.model_dump(exclude_unset=True)
+        update_data = new_data.model_dump(exclude_unset=True)
 
-        old_count = db_measurement.measurement_count
-        old_dl = db_measurement.download_speed or 0.0
-        old_ul = db_measurement.upload_speed or 0.0
-        old_ping = db_measurement.ping or 0
+        # 1. Update the sum fields and count
+        new_dl = update_data.get("download_speed", 0.0) or 0.0
+        new_ul = update_data.get("upload_speed", 0.0) or 0.0
+        new_ping = update_data.get("ping", 0) or 0
 
-        if "download_speed" in update_data:
-            new_dl = update_data["download_speed"] or 0.0
-            db_measurement.download_speed_sum = (
-                db_measurement.download_speed_sum - old_dl + new_dl
-            )
-            db_measurement.download_speed = db_measurement.download_speed_sum / old_count
-            update_data["color"] = self.calculate_color(db_measurement.download_speed, db_measurement.upload_speed, db_measurement.ping)
+        db_measurement.download_speed_sum += new_dl
+        db_measurement.upload_speed_sum += new_ul
+        db_measurement.ping_sum += new_ping
+        db_measurement.measurement_count += 1
 
-        if "upload_speed" in update_data:
-            new_ul = update_data["upload_speed"] or 0.0
-            db_measurement.upload_speed_sum = (
-                db_measurement.upload_speed_sum - old_ul + new_ul
-            )
-            db_measurement.upload_speed = db_measurement.upload_speed_sum / old_count
+        # 2. Recalculate averages
+        count = db_measurement.measurement_count
+        db_measurement.download_speed = db_measurement.download_speed_sum / count
+        db_measurement.upload_speed = db_measurement.upload_speed_sum / count
+        db_measurement.ping = int(db_measurement.ping_sum / count)
 
-        if "ping" in update_data:
-            new_ping = update_data["ping"] or 0
-            db_measurement.ping_sum = db_measurement.ping_sum - old_ping + new_ping
-            db_measurement.ping = int(db_measurement.ping_sum / old_count)
+        # 3. Update color if relevant
+        db_measurement.color = self.calculate_color(
+            db_measurement.download_speed,
+            db_measurement.upload_speed,
+            db_measurement.ping,
+        )
 
+        # 4. Commit updates
         try:
-            # pozostałe aktualizacje (np. latitude, longitude, building_name, timestamp)
-            for key, value in update_data.items():
-                setattr(db_measurement, key, value)
-
             self.db.commit()
             self.db.refresh(db_measurement)
             return db_measurement
@@ -218,8 +214,9 @@ class MeasurementService:
             self.db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error podczas aktualizacji pomiaru: {str(e)}",
+                detail=f"Error while adding measurement to point: {str(e)}",
             )
+
 
     def delete_measurement(self, measurement_id: int):
         """Usuń pojedynczy pomiar z agregatu lub cały agregat jeśli to jedyny pomiar"""
