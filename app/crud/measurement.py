@@ -4,7 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text, func
 from app.models import Measurement
 from app.schemas import MeasurementBase, MeasurementUpdate, MeasurementResponse
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional, Union
 from app.utils.distance_utils import (
     haversine_distance,
@@ -26,7 +26,8 @@ class MeasurementService:
                     detail="Brak wymaganych współrzędnych",
                 )
 
-            timestamp = datetime.now(timezone.utc + 2)
+            utc_plus_2 = timezone(timedelta(hours=2))
+            timestamp = datetime.now(utc_plus_2)
 
             new_measurement = Measurement(
                 latitude=measurement_data.latitude,
