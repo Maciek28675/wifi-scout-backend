@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import (
     Column,
     Integer,
@@ -100,12 +100,11 @@ class Measurement(Base):
         DateTime,
         nullable=False,
         server_default=text("CURRENT_TIMESTAMP"),
-        onupdate=datetime.utcnow, 
+        onupdate=datetime.now(timezone.utc), 
         comment="Timestamp of the last update or last measurement included in the aggregate",
     )
     color = Column(
-        String(5),
-        CheckConstraint("color IN ('red', 'green', 'gray')"),
+        String(7),
         nullable=False,
         comment="Color indicator based on average download speed thresholds",
     )

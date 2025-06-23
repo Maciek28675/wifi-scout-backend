@@ -4,11 +4,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import text, func
 from app.models import Measurement
 from app.schemas import MeasurementBase, MeasurementUpdate, MeasurementResponse
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional, Union
 from app.utils.distance_utils import (
     haversine_distance,
 )
+from app.utils.buildings import find_building
+
 
 class MeasurementService:
     def __init__(self, db: Session):
@@ -24,7 +26,7 @@ class MeasurementService:
                     detail="Brak wymaganych współrzędnych",
                 )
 
-            timestamp = measurement_data.timestamp or datetime.utcnow()
+            timestamp = measurement_data.timestamp or datetime.now(timezone.utc)
 
             new_measurement = Measurement(
                 latitude=measurement_data.latitude,
@@ -33,12 +35,51 @@ class MeasurementService:
                 download_speed=measurement_data.download_speed,
                 upload_speed=measurement_data.upload_speed,
                 ping=measurement_data.ping,
-                building_name=measurement_data.building_name,
+                building_name=find_building(
+                    measurement_data.latitude,
+                    measurement_data.longitude ),
                 timestamp=timestamp,
-                color=self.calculate_color(measurement_data.download_speed),
+                color=self.calculate_color(
+                    measurement_data.download_speed, 
+                    measurement_data.upload_speed,
+                    measurement_data.ping ),
                 measurement_count=1,
             )
 
+            # Get measurements in the same building
+            measurements_in_bulidng = ( 
+                self.db.query(Measurement)
+                .filter(Measurement.building_name == new_measurement.building_name)
+                .order_by(Measurement.timestamp.desc())
+                .all() 
+            )
+
+            for measurement in measurements_in_bulidng:
+                d = haversine_distance( 
+                    new_measurement.latitude,
+                    new_measurement.longitude, 
+                    measurement.latitude, 
+                    measurement.longitude   
+                )
+
+                # if new measurement is within 5 meters of exisitng measurement and on the same alt then update
+                if d <= 5 and (measurement.height-1 <= measurement.height <= measurement.height+1):
+                    update_measurement_data = MeasurementUpdate(
+                        latitude=new_measurement.latitude,
+                        longitude=new_measurement.longitude,
+                        height=new_measurement.height,
+                        download_speed=new_measurement.download_speed,
+                        upload_speed=new_measurement.upload_speed,
+                        ping=new_measurement.ping,
+                        timestamp=new_measurement.timestamp,
+                        building_name=new_measurement.building_name 
+                    )
+                    self.update_measurement(measurement.id, update_measurement_data)
+
+                    print(f'Measurement ID: {measurement.id} updated.')
+
+                    break
+                
             self.db.add(new_measurement)
             self.db.commit()
             self.db.refresh(new_measurement)
@@ -146,7 +187,7 @@ class MeasurementService:
                 db_measurement.download_speed_sum - old_dl + new_dl
             )
             db_measurement.download_speed = db_measurement.download_speed_sum / old_count
-            update_data["color"] = self.calculate_color(db_measurement.download_speed)
+            update_data["color"] = self.calculate_color(db_measurement.download_speed, db_measurement.upload_speed, db_measurement.ping)
 
         if "upload_speed" in update_data:
             new_ul = update_data["upload_speed"] or 0.0

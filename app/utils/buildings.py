@@ -78,4 +78,4 @@ def find_building(lat: float, lon: float) -> str | None:
         polygon = Polygon((lon, lat) for (lat, lon) in coords)  # zamiana (lat, lon) -> (lon, lat)
         if polygon.contains(point):
             return name
-    return None
+    return "Politechnika Wrocławska"
