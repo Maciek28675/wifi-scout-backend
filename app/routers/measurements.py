@@ -68,20 +68,20 @@ async def get_measurement(measurement_id: int, db: Session = Depends(get_db)):
     return MeasurementResponse.model_validate(db_m)
 
 
-@router.get("/", response_model=List[MeasurementResponse])
+@router.get("/", response_model=List[Measurement])
 async def list_measurements(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
-    building_name: Optional[str] = Query(
-        None, description="Filtruj po nazwie budynku"
-    ),
-    latitude: Optional[float] = Query(
-        None, ge=-90, le=90, description="Szerokość geograficzna"
-    ),
-    longitude: Optional[float] = Query(
-        None, ge=-180, le=180, description="Długość geograficzna"
-    ),
-    radius_km: float = Query(1.0, gt=0, description="Promień wyszukiwania w km"),
+    # skip: int = Query(0, ge=0),
+    # limit: int = Query(100, ge=1, le=1000),
+    # building_name: Optional[str] = Query(
+    #     None, description="Filtruj po nazwie budynku"
+    # ),
+    # latitude: Optional[float] = Query(
+    #     None, ge=-90, le=90, description="Szerokość geograficzna"
+    # ),
+    # longitude: Optional[float] = Query(
+    #     None, ge=-180, le=180, description="Długość geograficzna"
+    # ),
+    # radius_km: float = Query(1.0, gt=0, description="Promień wyszukiwania w km"),
     db: Session = Depends(get_db),
 ):
     """
@@ -93,9 +93,9 @@ async def list_measurements(
     result = service.get_measurements()
 
     if result and isinstance(result[0], dict):
-        return [MeasurementResponse.model_validate(m) for m in result]  # z distance_m
+        return [Measurement.model_validate(m) for m in result]  # z distance_m
     
-    return [MeasurementResponse.model_validate(m) for m in result]  # z sumami, count i avg
+    return [Measurement.model_validate(m) for m in result]  # z sumami, count i avg
 
 
 @router.put("/{measurement_id}", response_model=MeasurementResponse)

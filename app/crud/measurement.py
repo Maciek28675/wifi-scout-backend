@@ -276,7 +276,7 @@ class MeasurementService:
         """
         
         min_download = 1
-        max_download = 200
+        max_download = 150
         min_upload = 1
         max_upload = 100
         min_ping = 8
@@ -295,10 +295,10 @@ class MeasurementService:
             (upload_w * normalized_upload) +
             (ping_w * normalized_ping)) / (download_w + upload_w + ping_w)
         
-        if score <= 30:
+        if score <= 20:
             return '#B22D2D'
-        elif score > 30 and score <= 70:
+        elif score > 20 and score <= 60:
             return '#E4A316'
-        elif score > 70:
+        elif score > 60:
             return '#67B22D'
         
