@@ -90,9 +90,7 @@ async def list_measurements(
      - pobliskie punkty w promieniu `radius_km` od (latitude, longitude).
     """
     service = MeasurementService(db)
-    result = service.get_measurements(
-        skip, limit, building_name, latitude, longitude, radius_km
-    )
+    result = service.get_measurements()
 
     if result and isinstance(result[0], dict):
         return [MeasurementResponse.model_validate(m) for m in result]  # z distance_m
