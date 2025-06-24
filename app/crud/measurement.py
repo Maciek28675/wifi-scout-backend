@@ -110,72 +110,84 @@ class MeasurementService:
 
     def get_measurements(
         self,
-        skip: int = 0,
-        limit: int = 50,
-        building_name: Optional[str] = None,
-        latitude: Optional[float] = None,
-        longitude: Optional[float] = None,
-        radius_km: float = 1.0,
-    ) -> Union[List[MeasurementResponse], List[dict]]:
+        # skip: int = 0,
+        # limit: int = 50,
+        # building_name: Optional[str] = None,
+        # latitude: Optional[float] = None,
+        # longitude: Optional[float] = None,
+        # radius_km: float = 1.0,
+    ) -> List[Measurement]:
         """
         Jeśli podano building_name – zwróć pomiary dla tego budynku.
         Jeśli podano latitude i longitude – zwróć agregaty w promieniu radius_km.
         """
-        MAX_LIMIT = 200
-        if limit > MAX_LIMIT:
+
+        all_measurements = ( self.db.query(Measurement)
+                            .order_by(Measurement.timestamp.desc())
+                            .all() )
+
+        if not all_measurements:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Maksymalny limit to {MAX_LIMIT}"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Nie znaleziono pomiarów"
             )
+        
+        return all_measurements
+     
+        # MAX_LIMIT = 200
+        # if limit > MAX_LIMIT:
+        #     raise HTTPException(
+        #         status_code=status.HTTP_400_BAD_REQUEST,
+        #         detail=f"Maksymalny limit to {MAX_LIMIT}"
+        #     )
 
-        if building_name:
-            return (
-                self.db.query(Measurement)
-                .filter(Measurement.building_name == building_name)
-                .order_by(Measurement.timestamp.desc())
-                .offset(skip)
-                .limit(limit)
-                .all()
-            )
+        # if building_name:
+        #     return (
+        #         self.db.query(Measurement)
+        #         .filter(Measurement.building_name == building_name)
+        #         .order_by(Measurement.timestamp.desc())
+        #         .offset(skip)
+        #         .limit(limit)
+        #         .all()
+        #     )
 
-        if latitude is not None and longitude is not None:
-            radius_m = radius_km * 1000
-            delta = radius_km * 0.01
-            records = self.db.query(Measurement).filter(
-                Measurement.latitude.between(latitude - delta, latitude + delta),
-                Measurement.longitude.between(longitude - delta, longitude + delta)
-            ).all()
+        # if latitude is not None and longitude is not None:
+        #     radius_m = radius_km * 1000
+        #     delta = radius_km * 0.01
+        #     records = self.db.query(Measurement).filter(
+        #         Measurement.latitude.between(latitude - delta, latitude + delta),
+        #         Measurement.longitude.between(longitude - delta, longitude + delta)
+        #     ).all()
 
-            results: List[dict] = []
-            for m in records:
-                d = haversine_distance(latitude, longitude, m.latitude, m.longitude)
-                if d <= radius_m:
-                    results.append({
-                        "id": m.id,
-                        "latitude": m.latitude,
-                        "longitude": m.longitude,
-                        "building_name": m.building_name,
-                        # sumy
-                        "download_speed_sum": m.download_speed_sum,
-                        "upload_speed_sum": m.upload_speed_sum,
-                        "ping_sum": m.ping_sum,
-                        "measurement_count": m.measurement_count,
-                        # średnie
-                        "download_speed": m.download_speed,
-                        "upload_speed": m.upload_speed,
-                        "ping": m.ping,
-                        "color": m.color,
-                        "timestamp": m.timestamp,
-                        # dodatkowo
-                        "distance_m": d,
-                    })
-            results.sort(key=lambda x: x["distance_m"])
-            return results[skip: skip + limit]
+        #     results: List[dict] = []
+        #     for m in records:
+        #         d = haversine_distance(latitude, longitude, m.latitude, m.longitude)
+        #         if d <= radius_m:
+        #             results.append({
+        #                 "id": m.id,
+        #                 "latitude": m.latitude,
+        #                 "longitude": m.longitude,
+        #                 "building_name": m.building_name,
+        #                 # sumy
+        #                 "download_speed_sum": m.download_speed_sum,
+        #                 "upload_speed_sum": m.upload_speed_sum,
+        #                 "ping_sum": m.ping_sum,
+        #                 "measurement_count": m.measurement_count,
+        #                 # średnie
+        #                 "download_speed": m.download_speed,
+        #                 "upload_speed": m.upload_speed,
+        #                 "ping": m.ping,
+        #                 "color": m.color,
+        #                 "timestamp": m.timestamp,
+        #                 # dodatkowo
+        #                 "distance_m": d,
+        #             })
+        #     results.sort(key=lambda x: x["distance_m"])
+        #     return results[skip: skip + limit]
 
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Podaj albo building_name, albo latitude i longitude"
-        )
+        # raise HTTPException(
+        #     status_code=status.HTTP_400_BAD_REQUEST,
+        #     detail="Podaj albo building_name, albo latitude i longitude"
+        # )
 
     def update_measurement(self, measurement_id: int, new_data: MeasurementUpdate):
         """Add a new measurement to an existing geographic point"""
